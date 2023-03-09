@@ -54,7 +54,7 @@ public class AskController {
         if (overloaded) {
             return ResponseEntity.ok(new ApiResponse(false, "流量超出限制，明天见啦！"));
         }
-        String resp = askService.ask(currentUser, askRequest.getQuestion());
+        String resp = askService.ask(currentUser, askRequest);
 
 //        URI location = ServletUriComponentsBuilder
 //                .fromCurrentRequest().path("/{pollId}")

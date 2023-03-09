@@ -11,6 +11,9 @@ import com.paic.gpt.repository.RoleRepository;
 import com.paic.gpt.repository.UserRepository;
 import com.paic.gpt.repository.UserRoleRepository;
 import com.paic.gpt.security.JwtTokenProvider;
+import com.paic.gpt.service.AskService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +34,8 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -61,8 +66,8 @@ public class AuthController {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         String jwt = tokenProvider.generateToken(authentication);
+        logger.info(loginRequest.getUsername() + " login successfully.");
         return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
     }
 

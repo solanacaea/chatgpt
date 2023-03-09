@@ -9,6 +9,7 @@ import com.paic.gpt.repository.ReqTraceRepository;
 import com.paic.gpt.repository.UserRepository;
 import com.paic.gpt.security.UserPrincipal;
 import com.paic.gpt.util.AppConstants;
+import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class ReqTraceService {
@@ -33,6 +35,26 @@ public class ReqTraceService {
     private ReqTraceDao rtDao;
 
     private static final Logger logger = LoggerFactory.getLogger(ReqTraceService.class);
+
+    public void syncTrace(ChatCompletionResult result, String question, String answer, String username) {
+        CompletableFuture.runAsync(() -> {
+            long createdAt = result.getCreated();
+            GptUserReqTrace gptUserReqTrace = GptUserReqTrace.builder()
+                    .question(question)
+                    .answer(answer)
+                    .reqTokens((int)result.getUsage().getPromptTokens())
+                    .respTokens((int)result.getUsage().getCompletionTokens())
+                    .totalTokens((int)result.getUsage().getTotalTokens())
+                    .count(1)
+                    .gptStatus(1)
+                    .sessionId(result.getId())
+                    .user(username)
+                    .msgId("")
+                    .timeCost((int)(System.currentTimeMillis() / 1000 - createdAt))
+                    .build();
+            reqTraceRepository.save(gptUserReqTrace);
+        });
+    }
 
     public int getUserTodayCount(String currentUser) {
         return rtDao.getUserTodayCount(currentUser);

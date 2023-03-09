@@ -8,3 +8,6 @@ application.properties
 *.cmd
 mvnw
 Dockerfile
+target
+.idea
+server/src/test

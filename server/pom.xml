@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.example</groupId>
+	<groupId>com.gpt</groupId>
 	<artifactId>pagpt</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -23,6 +23,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<jjwt.version>0.11.2</jjwt.version>
+		<openai.sdk.version>0.11.0</openai.sdk.version>
 	</properties>
 
 	<dependencies>
@@ -93,17 +94,22 @@
 		<dependency>
 			<groupId>com.theokanning.openai-gpt3-java</groupId>
 			<artifactId>service</artifactId>
-			<version>0.11.0</version>
+			<version>${openai.sdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.theokanning.openai-gpt3-java</groupId>
 			<artifactId>api</artifactId>
-			<version>0.11.0</version>
+			<version>${openai.sdk.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.theokanning.openai-gpt3-java</groupId>
 			<artifactId>client</artifactId>
-			<version>0.11.0</version>
+			<version>${openai.sdk.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.8.1</version>
 		</dependency>
 	</dependencies>
 

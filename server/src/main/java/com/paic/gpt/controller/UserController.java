@@ -5,7 +5,6 @@ import com.paic.gpt.model.User;
 import com.paic.gpt.payload.UserIdentityAvailability;
 import com.paic.gpt.payload.UserProfile;
 import com.paic.gpt.payload.UserSummary;
-import com.paic.gpt.repository.ReqTraceRepository;
 import com.paic.gpt.repository.UserRepository;
 import com.paic.gpt.security.UserPrincipal;
 import com.paic.gpt.service.ReqTraceService;
@@ -24,17 +23,16 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
-    private ReqTraceRepository reqTraceRepository;
-
-    @Autowired
     private ReqTraceService reqTraceService;
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/user/me")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('User')")
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getName());
+        UserSummary userSummary = new UserSummary(
+                currentUser.getId(), currentUser.getUsername(), currentUser.getName(),
+                currentUser.getTotalCount(), currentUser.getCurrCount());
         return userSummary;
     }
 
