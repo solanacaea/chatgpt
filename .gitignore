@@ -1,0 +1,10 @@
+bin/
+/bin
+*.log
+*.class
+*.DS_store
+application.properties
+*.iml
+*.cmd
+mvnw
+Dockerfile
