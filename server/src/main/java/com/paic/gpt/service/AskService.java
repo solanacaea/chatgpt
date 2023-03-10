@@ -1,5 +1,6 @@
 package com.paic.gpt.service;
 
+import com.paic.gpt.model.Conversation;
 import com.paic.gpt.model.GptUserReqTrace;
 import com.paic.gpt.payload.AskRequest;
 import com.paic.gpt.repository.ReqTraceRepository;
@@ -37,7 +38,6 @@ public class AskService {
 
     public String ask(UserPrincipal user, AskRequest askReq) {
         String question = askReq.getQuestion();
-        String convId = askReq.getConversationId();
         OpenAiService service = new OpenAiService(apiKey, Duration.ofSeconds(10L));
         ChatMessage cm = new ChatMessage(ChatMessageRole.USER.value(), question);
         ChatCompletionRequest req = ChatCompletionRequest.builder()
@@ -54,11 +54,23 @@ public class AskService {
         logger.info("user=[" + user.getUsername() + "] on result of [" + question + "]");
         logger.info(result.toString());
         String resultText = result.getChoices().get(0).getMessage().getContent();
-        if (StringUtils.isBlank(convId)) {
-            convId = UUID.randomUUID().toString();
-        }
-        rtService.syncTrace(result, question, resultText, user.getUsername());
+        String convId = conversationHandler(user.getUsername(), askReq.getConversationId());
+
+        rtService.syncTrace(result, convId,
+                question, resultText, user.getUsername());
         return resultText;
     }
+
+    private String conversationHandler(String username, String convId) {
+        if (StringUtils.isBlank(convId)) {
+            convId = UUID.randomUUID().toString();
+            Conversation c = new Conversation(username, convId);
+        } else {
+            Conversation
+        }
+
+        return convId;
+    }
+
 
 }

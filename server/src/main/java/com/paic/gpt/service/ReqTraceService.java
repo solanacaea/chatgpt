@@ -36,7 +36,8 @@ public class ReqTraceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReqTraceService.class);
 
-    public void syncTrace(ChatCompletionResult result, String question, String answer, String username) {
+    public void syncTrace(ChatCompletionResult result, String conversionId,
+                          String question, String answer, String username) {
         CompletableFuture.runAsync(() -> {
             long createdAt = result.getCreated();
             GptUserReqTrace gptUserReqTrace = GptUserReqTrace.builder()
@@ -47,9 +48,9 @@ public class ReqTraceService {
                     .totalTokens((int)result.getUsage().getTotalTokens())
                     .count(1)
                     .gptStatus(1)
-                    .sessionId(result.getId())
+                    .conversationId(conversionId)
                     .user(username)
-                    .msgId("")
+                    .msgId(result.getId())
                     .timeCost((int)(System.currentTimeMillis() / 1000 - createdAt))
                     .build();
             reqTraceRepository.save(gptUserReqTrace);
