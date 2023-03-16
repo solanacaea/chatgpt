@@ -7,7 +7,7 @@ public class AskRequest {
     @NotBlank
     @Size(max = 4000)
     private String question;
-
+    private String questionId;
     private String conversationId;
 
     public String getQuestion() {
@@ -26,4 +26,11 @@ public class AskRequest {
         this.conversationId = conversationId;
     }
 
+    public String getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
+    }
 }
