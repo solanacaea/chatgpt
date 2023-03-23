@@ -1,13 +1,16 @@
 package com.paic.gpt.payload;
 
+import lombok.ToString;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+@ToString
 public class AskRequest {
-    @NotBlank
+
     @Size(max = 4000)
     private String question;
-    private String questionId;
+    private String msgId;
     private String conversationId;
 
     public String getQuestion() {
@@ -26,11 +29,11 @@ public class AskRequest {
         this.conversationId = conversationId;
     }
 
-    public String getQuestionId() {
-        return questionId;
+    public String getMsgId() {
+        return msgId;
     }
 
-    public void setQuestionId(String questionId) {
-        this.questionId = questionId;
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 }

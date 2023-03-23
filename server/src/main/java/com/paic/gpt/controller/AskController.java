@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import static com.paic.gpt.util.AppConstants.ERROR_RESP_MSG;
+
 @RestController
 @RequestMapping("/api/ask")
 public class AskController {
@@ -49,18 +51,28 @@ public class AskController {
     @PreAuthorize("hasRole('User')")
     public ResponseEntity<?> ask(@CurrentUser UserPrincipal currentUser,
                                  @Valid @RequestBody AskRequest askRequest) {
-
-        boolean overloaded = userService.checkUserDosage(currentUser);
-        if (overloaded) {
-            return ResponseEntity.ok(new ApiResponse(false, "流量超出限制，明天见啦！"));
+        logger.info(currentUser.getUsername() + " 请求：" + askRequest);
+        String overloaded = userService.checkUserDosage(currentUser);
+        if (overloaded != null) {
+            logger.info(currentUser.getUsername() + "..." + overloaded);
+            return ResponseEntity.ok(new ApiResponse(false, overloaded, askRequest.getMsgId()));
         }
-        String resp = askService.ask(currentUser, askRequest);
+
+        String resp;
+        try {
+            userService.plus();
+            resp = askService.ask(currentUser, askRequest);
+        } catch (Exception e) {
+            resp = ERROR_RESP_MSG;
+        } finally {
+            userService.minus();
+        }
 
 //        URI location = ServletUriComponentsBuilder
 //                .fromCurrentRequest().path("/{pollId}")
 //                .buildAndExpand(gptUserReqTrace.getId()).toUri();
 
-        return ResponseEntity.ok(new ApiResponse(true, resp));
+        return ResponseEntity.ok(new ApiResponse(true, resp, askRequest.getMsgId()));
     }
 
 

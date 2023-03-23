@@ -2,6 +2,7 @@ package com.paic.gpt.service;
 
 import com.paic.gpt.exception.BadRequestException;
 import com.paic.gpt.model.GptUserReqTrace;
+import com.paic.gpt.model.UserUsage;
 import com.paic.gpt.payload.PagedResponse;
 import com.paic.gpt.payload.AskResponse;
 import com.paic.gpt.repository.ReqTraceDao;
@@ -9,6 +10,7 @@ import com.paic.gpt.repository.ReqTraceRepository;
 import com.paic.gpt.repository.UserRepository;
 import com.paic.gpt.security.UserPrincipal;
 import com.paic.gpt.util.AppConstants;
+import com.theokanning.openai.completion.CompletionResult;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -37,28 +39,71 @@ public class ReqTraceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReqTraceService.class);
 
-    public void syncTrace(ChatCompletionResult result, String conversionId,
-                          String question, String answer, String username) {
+    public void syncTrace(ChatCompletionResult result, String conversionId, String msgId,
+                          String question, String answer, UserPrincipal user) {
         try {
             int timeCost;
             int reqToken = 0;
             int respToken = 0;
             int totalToken = 0;
-            String msgId = "";
             if (result == null) {
                 timeCost = 30;
             } else {
                 reqToken = (int) result.getUsage().getPromptTokens();
                 respToken = (int) result.getUsage().getCompletionTokens();
                 totalToken = (int) result.getUsage().getTotalTokens();
-                msgId = result.getId();
                 long createdAt = result.getCreated();
                 timeCost = (int) (System.currentTimeMillis() / 1000 - createdAt);
             }
             int finalReqToken = reqToken;
             int finalRespToken = respToken;
             int finalTotalToken = totalToken;
-            String finalMsgId = msgId;
+            CompletableFuture.runAsync(() -> {
+                GptUserReqTrace gptUserReqTrace = GptUserReqTrace.builder()
+                        .question(question)
+                        .answer(answer)
+                        .reqTokens(finalReqToken)
+                        .respTokens(finalRespToken)
+                        .totalTokens(finalTotalToken)
+                        .count(1)
+                        .gptStatus(1)
+                        .conversationId(conversionId)
+                        .user(user.getUsername())
+                        .msgId(msgId)
+                        .timeCost(timeCost)
+                        .build();
+                reqTraceRepository.save(gptUserReqTrace);
+                if (result != null) {
+                    UserUsage uu = user.getUsage();
+                    uu.setAskCount(uu.getAskCount() + 1);
+                    uu.setTokenCount(uu.getTokenCount() + finalTotalToken);
+                    rtDao.updateUsage(uu);
+                }
+            });
+        } catch (Exception e) {
+            logger.error("syncTrace异常："+ ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    public void syncTrace_GPT4(CompletionResult result, String conversionId, String msgId,
+                               String question, String answer, String username) {
+        try {
+            int timeCost;
+            int reqToken = 0;
+            int respToken = 0;
+            int totalToken = 0;
+            if (result == null) {
+                timeCost = 30;
+            } else {
+                reqToken = (int) result.getUsage().getPromptTokens();
+                respToken = (int) result.getUsage().getCompletionTokens();
+                totalToken = (int) result.getUsage().getTotalTokens();
+                long createdAt = result.getCreated();
+                timeCost = (int) (System.currentTimeMillis() / 1000 - createdAt);
+            }
+            int finalReqToken = reqToken;
+            int finalRespToken = respToken;
+            int finalTotalToken = totalToken;
             CompletableFuture.runAsync(() -> {
                 GptUserReqTrace gptUserReqTrace = GptUserReqTrace.builder()
                         .question(question)
@@ -70,7 +115,7 @@ public class ReqTraceService {
                         .gptStatus(1)
                         .conversationId(conversionId)
                         .user(username)
-                        .msgId(finalMsgId)
+                        .msgId(msgId)
                         .timeCost(timeCost)
                         .build();
                 reqTraceRepository.save(gptUserReqTrace);
@@ -80,8 +125,8 @@ public class ReqTraceService {
         }
     }
 
-    public int getUserTodayCount(String currentUser) {
-        return rtDao.getUserTodayCount(currentUser);
+    public UserUsage getUsage(String currentUser) {
+        return rtDao.getUsage(currentUser);
     }
 
     public PagedResponse<AskResponse> getAllPolls(UserPrincipal currentUser, int page, int size) {

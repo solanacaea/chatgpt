@@ -1,7 +1,9 @@
 package com.paic.gpt.controller;
 
 import com.paic.gpt.exception.ResourceNotFoundException;
+import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.User;
+import com.paic.gpt.model.UserUsage;
 import com.paic.gpt.payload.UserIdentityAvailability;
 import com.paic.gpt.payload.UserProfile;
 import com.paic.gpt.payload.UserSummary;
@@ -32,7 +34,7 @@ public class UserController {
     public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
         UserSummary userSummary = new UserSummary(
                 currentUser.getId(), currentUser.getUsername(), currentUser.getName(),
-                currentUser.getTotalCount(), currentUser.getCurrCount());
+                currentUser.getMemberInfo(), currentUser.getUsage());
         return userSummary;
     }
 
@@ -53,10 +55,10 @@ public class UserController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
-        int currCount = reqTraceService.getUserTodayCount(username);
-        int maxCount = user.getMember().getReqCount();
+        UserUsage usage = reqTraceService.getUsage(username);
+        Membership membership = user.getMember();
         UserProfile userProfile = new UserProfile(user.getId(), user.getUsername(), user.getName(),
-                user.getCreatedAt(), currCount, maxCount);
+                user.getCreatedAt(), usage, membership);
 
         return userProfile;
     }

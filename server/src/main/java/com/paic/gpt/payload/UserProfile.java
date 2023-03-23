@@ -1,5 +1,8 @@
 package com.paic.gpt.payload;
 
+import com.paic.gpt.model.Membership;
+import com.paic.gpt.model.UserUsage;
+
 import java.util.Date;
 
 public class UserProfile {
@@ -7,16 +10,16 @@ public class UserProfile {
     private String username;
     private String name;
     private Date joinedAt;
-    private Integer currCount;
-    private Integer totalCount;
+    private UserUsage usage;
+    private Membership membership;
 
-    public UserProfile(Long id, String username, String name, Date joinedAt, Integer currCount, Integer totalCount) {
+    public UserProfile(Long id, String username, String name, Date joinedAt, UserUsage usage, Membership membership) {
         this.id = id;
         this.username = username;
         this.name = name;
         this.joinedAt = joinedAt;
-        this.currCount = currCount;
-        this.totalCount = totalCount;
+        this.usage = usage;
+        this.membership = membership;
     }
 
     public Long getId() {
@@ -51,19 +54,19 @@ public class UserProfile {
         this.joinedAt = joinedAt;
     }
 
-    public Integer getCurrCount() {
-        return currCount;
+    public UserUsage getUsage() {
+        return usage;
     }
 
-    public void setCurrCount(Integer currCount) {
-        this.currCount = currCount;
+    public void setUsage(UserUsage usage) {
+        this.usage = usage;
     }
 
-    public Integer getTotalCount() {
-        return totalCount;
+    public Membership getMembership() {
+        return membership;
     }
 
-    public void setTotalCount(Integer totalCount) {
-        this.totalCount = totalCount;
+    public void setMembership(Membership membership) {
+        this.membership = membership;
     }
 }

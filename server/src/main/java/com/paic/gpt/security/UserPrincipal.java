@@ -1,8 +1,10 @@
 package com.paic.gpt.security;
 
+import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.User;
 import com.paic.gpt.model.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.paic.gpt.model.UserUsage;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,26 +30,26 @@ public class UserPrincipal implements UserDetails {
     @JsonIgnore
     private final String password;
 
-    private final Integer totalCount;
-    private final Integer currCount;
+    private final Membership memberInfo;
+    private final UserUsage usage;
 
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserPrincipal(Long id, String name, String username,
                          String email, String password,
                          Collection<? extends GrantedAuthority> authorities,
-                         int totalCount, int currCount) {
+                         Membership memberInfo, UserUsage usage) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
-        this.totalCount = totalCount;
-        this.currCount = currCount;
+        this.memberInfo = memberInfo;
+        this.usage = usage;
     }
 
-    public static UserPrincipal create(User user, List<UserRole> roles, int currCount) {
+    public static UserPrincipal create(User user, List<UserRole> roles, UserUsage curr) {
         List<GrantedAuthority> authorities = roles.stream().map(role ->
                 new SimpleGrantedAuthority(defaultRolePrefix + role.getCode())
         ).collect(Collectors.toList());
@@ -59,8 +61,8 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getPwd(),
                 authorities,
-                user.getMember().getReqCount(),
-                currCount
+                user.getMember(),
+                curr
         );
     }
 
@@ -126,11 +128,11 @@ public class UserPrincipal implements UserDetails {
     }
 
 
-    public Integer getTotalCount() {
-        return totalCount;
+    public Membership getMemberInfo() {
+        return memberInfo;
     }
 
-    public Integer getCurrCount() {
-        return currCount;
+    public UserUsage getUsage() {
+        return usage;
     }
 }

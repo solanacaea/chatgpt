@@ -1,5 +1,6 @@
 package com.paic.gpt.controller;
 
+import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.RoleCode;
 import com.paic.gpt.model.User;
 import com.paic.gpt.model.UserRole;
@@ -78,10 +79,10 @@ public class AuthController {
                     HttpStatus.BAD_REQUEST);
         }
 
-        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
-                    HttpStatus.BAD_REQUEST);
-        }
+//        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
+//            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
+//                    HttpStatus.BAD_REQUEST);
+//        }
 
         // Creating user's account
         User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
@@ -96,6 +97,9 @@ public class AuthController {
 //                .orElseThrow(() -> new AppException("User Role not set."));
 //        user.setRoles(Collections.singleton(userRole));
 
+        Membership ms = new Membership();
+        ms.setId(2);
+        user.setMember(ms);
         User result = userRepository.save(user);
 
         URI location = ServletUriComponentsBuilder

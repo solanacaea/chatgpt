@@ -29,7 +29,7 @@ then
 else
   echo "starting..."
   # nohup java -jar $APP_NAME > /dev/null 2>&1 &
-  nohup java -jar pagpt.jar $APP_NAME > server.log 2>&1 &
+  nohup java -jar pagpt.jar $APP_NAME > /home/project/logs/server.log 2>&1 &
   echo "starting..."
 fi
 }
@@ -40,6 +40,8 @@ is_exist
 if [ $? -eq "0" ]
 then
  kill -9 $pid
+ cur_dateTime="`date +%Y-%m-%d,%H:%m:%s`"
+ mv /home/project/logs/server.log /home/project/logs/server.log_$cur_dateTime
 else
  echo "${APP_NAME} is not running"
 fi

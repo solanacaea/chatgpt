@@ -6,5 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class AskResponse {
+    private String msgId;
     private String answer;
 }

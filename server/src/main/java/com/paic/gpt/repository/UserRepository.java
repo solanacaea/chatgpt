@@ -1,6 +1,7 @@
 package com.paic.gpt.repository;
 
 import com.paic.gpt.model.User;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

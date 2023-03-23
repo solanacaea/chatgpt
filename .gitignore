@@ -11,3 +11,4 @@ Dockerfile
 target
 .idea
 server/src/test
+client

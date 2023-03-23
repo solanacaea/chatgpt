@@ -4,14 +4,14 @@ import javax.validation.constraints.*;
 
 public class SignUpRequest {
     @NotBlank
-    @Size(min = 4, max = 40)
+    @Size(min = 3, max = 40)
     private String name;
 
     @NotBlank
     @Size(min = 3, max = 15)
     private String username;
 
-    @NotBlank
+//    @NotBlank
     @Size(max = 40)
     @Email
     private String email;
