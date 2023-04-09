@@ -35,20 +35,22 @@ public class User extends DateAudit {
     @Size(max = 100)
     private String pwd;
 
+    private int status;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "acc_type")
     private Membership member;
-
 
     public User() {
 
     }
 
-    public User(String name, String username, String email, String pwd) {
+    public User(String name, String username, String email, String pwd, int status) {
         this.name = name;
         this.username = username;
         this.email = email;
         this.pwd = pwd;
+        this.status = status;
     }
 
     public Long getId() {
@@ -89,6 +91,14 @@ public class User extends DateAudit {
 
     public void setPwd(String password) {
         this.pwd = password;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public Membership getMember() {

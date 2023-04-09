@@ -3,20 +3,16 @@ package com.paic.gpt.repository;
 import com.paic.gpt.model.Conversation;
 import com.paic.gpt.model.UserUsage;
 import com.paic.gpt.util.AppConstants;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.time.Instant;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class ReqTraceDao {
@@ -52,21 +48,10 @@ public class ReqTraceDao {
         em.merge(u);
     }
 
-    public List<Conversation> getUserConversation(String username) {
-        String hql = "from Conversation r where r.username = :username and createdAt > :today";
-        Query q = em.createQuery(hql);
-        q.setParameter(username, username);
-        q.setParameter("today", new Date());
-        List<Conversation> count = q.getResultList();
-        return count;
-    }
-
-    public void updateUserConversation(String username) {
-        String hql = "from Conversation r where r.username = :username";
-        Query q = em.createQuery(hql);
-        q.setParameter(username, username);
-        q.setParameter("today", new Date());
-        q.executeUpdate();
+    @Transactional
+    @Modifying
+    public void updateUserConversation(Conversation conversation) {
+        em.merge(conversation);
     }
 
     public UserUsage getTotalUsage(Integer day) {
@@ -88,5 +73,28 @@ public class ReqTraceDao {
         }
         return total;
     }
+
+    public Conversation getUserConversationById(String convId) {
+        String hql = "from Conversation r where r.conversationId = :convId";
+        Query q = em.createQuery(hql);
+        q.setParameter("convId", convId);
+        List<Conversation> count = q.getResultList();
+        if (CollectionUtils.isEmpty(count)) {
+            return null;
+        }
+        return count.get(0);
+    }
+
+    @Transactional
+    @Modifying
+    public void updateName(String username, String name) {
+        String hql = "update User set name =:name, updatedAt=:updatedAt where username = :username";
+        Query q = em.createQuery(hql);
+        q.setParameter("name", name);
+        q.setParameter("username", username);
+        q.setParameter("updatedAt", new Date());
+        q.executeUpdate();
+    }
+
 
 }

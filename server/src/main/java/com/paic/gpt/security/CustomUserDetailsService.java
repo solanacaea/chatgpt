@@ -10,6 +10,8 @@ import com.paic.gpt.repository.UserRoleRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,8 +27,10 @@ import java.util.List;
 @CacheConfig(cacheNames = CustomUserDetailsService.CACHE_NAME)
 public class CustomUserDetailsService implements UserDetailsService {
     protected static final String CACHE_NAME = "CustomUserDetailsService";
-
     private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
+
+    @Autowired
+    private CacheManager cacheManager;
 
     @Autowired
     private UserRepository userRepository;
@@ -68,4 +72,25 @@ public class CustomUserDetailsService implements UserDetailsService {
         logger.info("cacheEvict cacheNames: {} ...", CACHE_NAME);
     }
 
+    public boolean cacheEvict(Long id) {
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        if (cache == null) {
+            logger.info("cacheEvict cacheNames: {} id=[{}], not exist...", CACHE_NAME, id);
+            return false;
+        }
+        boolean res = cache.evictIfPresent("com.paic.gpt.security.CustomUserDetailsService.loadUserById." + id);
+        logger.info("cacheEvict cacheNames: {} id=[{}]...", CACHE_NAME, id);
+        return res;
+    }
+
+    public boolean cacheEvict(String username) {
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        if (cache == null) {
+            logger.info("cacheEvict cacheNames: {} id=[{}], not exist...", CACHE_NAME, username);
+            return false;
+        }
+        boolean res = cache.evictIfPresent("com.paic.gpt.security.CustomUserDetailsService.loadUserByUsername." + username);
+        logger.info("cacheEvict cacheNames: {} id=[{}]...", CACHE_NAME, username);
+        return res;
+    }
 }

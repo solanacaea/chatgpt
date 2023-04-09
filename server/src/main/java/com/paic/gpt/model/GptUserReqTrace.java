@@ -30,13 +30,15 @@ public class GptUserReqTrace extends DateAudit {
     private Integer respTokens;
     private Integer totalTokens;
     private Integer timeCost;
+    private String questionType;
+    private String model;
 
     @Builder
     public GptUserReqTrace(Long id, Integer gptStatus, Integer count,
                            @NotBlank String question, String answer,
                            @NotBlank String user, String conversationId, String msgId,
                            Integer reqTokens, Integer respTokens, Integer totalTokens,
-                           Integer timeCost) {
+                           Integer timeCost, String questionType, String model) {
         this.id = id;
         this.gptStatus = gptStatus;
         this.count = count;
@@ -49,6 +51,8 @@ public class GptUserReqTrace extends DateAudit {
         this.respTokens = respTokens;
         this.totalTokens = totalTokens;
         this.timeCost = timeCost;
+        this.questionType = questionType;
+        this.model = model;
     }
 
     public GptUserReqTrace() {
@@ -102,4 +106,21 @@ public class GptUserReqTrace extends DateAudit {
     public Integer getTimeCost() {
         return timeCost;
     }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getQuestionType() {
+        return questionType;
+    }
+
+    public void setQuestionType(String questionType) {
+        this.questionType = questionType;
+    }
+
 }

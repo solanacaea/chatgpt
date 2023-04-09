@@ -1,9 +1,7 @@
 package com.paic.gpt.service;
 
 import com.paic.gpt.model.Conversation;
-import com.paic.gpt.model.GptUserReqTrace;
 import com.paic.gpt.payload.AskRequest;
-import com.paic.gpt.repository.ReqTraceRepository;
 import com.paic.gpt.security.UserPrincipal;
 import com.theokanning.openai.completion.CompletionRequest;
 import com.theokanning.openai.completion.CompletionResult;
@@ -20,14 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.SocketTimeoutException;
-import java.net.http.HttpTimeoutException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.paic.gpt.util.AppConstants.ERROR_RESP_MSG;
 
@@ -48,13 +41,13 @@ public class AskService {
     @Value("${openai.model.chat}")
     private String chatModel;
 
-    private static final int maxLength = 1000;
-    private static final long timeout = 60L;
+    public static final int maxLength = 1000;
+    public static final long timeout = 60L;
 
     @Autowired
     private ReqTraceService rtService;
 
-    private String getApiKey() {
+    public String getApiKey() {
         int idx = new Random().nextInt(3);
         switch (idx) {
             case 0: return apiKey1;
@@ -65,10 +58,19 @@ public class AskService {
     }
 
     public String ask(UserPrincipal user, AskRequest askReq) {
+        ChatMessage currCM = new ChatMessage(ChatMessageRole.USER.value(), askReq.getQuestion());
+        List<ChatMessage> cms;
+        if ("chatWithContext".equalsIgnoreCase(askReq.getQuestionType())) {
+            cms = askReq.getContext().stream().map(a -> new ChatMessage(a.getRole(), a.getContent()))
+                    .collect(Collectors.toList());
+            cms.add(currCM);
+        } else {
+            cms = Collections.singletonList(currCM);
+        }
+
         String question = askReq.getQuestion();
-        OpenAiService service = new OpenAiService(getApiKey(), Duration.ofSeconds(timeout));
-        ChatMessage cm = new ChatMessage(ChatMessageRole.USER.value(), question);
         ChatCompletionRequest req = ChatCompletionRequest.builder()
+//                .stream(true)
                 .model(chatModel)
 //                .n(1)
                 .topP(1.0)
@@ -76,13 +78,14 @@ public class AskService {
 //                .frequencyPenalty(0.5D)
 //                .presencePenalty(0D)
                 .maxTokens(maxLength)
-                .user(user.getUsername())
-                .messages(Collections.singletonList(cm))
+//                .user(user.getUsername())
+                .messages(cms)
                 .build();
-        String convId = conversationHandler(user.getUsername(), askReq.getConversationId());
+        String convId = askReq.getConversationId();
         String msgId = askReq.getMsgId();
         try {
             logger.info("question=" + req);
+            OpenAiService service = new OpenAiService(getApiKey(), Duration.ofSeconds(timeout));
             ChatCompletionResult result = service.createChatCompletion(req);
             long createdAt = result.getCreated();
             int timeCost = (int) (System.currentTimeMillis() / 1000 - createdAt);
@@ -90,13 +93,13 @@ public class AskService {
             logger.info("answer=" + result.toString());
             String resultText = result.getChoices().get(0).getMessage().getContent();
             rtService.syncTrace(result, convId, msgId,
-                    question, resultText, user);
+                    question, resultText, user, askReq.getQuestionType(), chatModel);
             return resultText;
         } catch (Exception e) {
             logger.error("ask异常："+ ExceptionUtils.getStackTrace(e));
             String resultText = ERROR_RESP_MSG;
             rtService.syncTrace(null, convId, msgId,
-                    question, resultText, user);
+                    question, resultText, user, askReq.getQuestionType(), chatModel);
             return resultText;
         }
     }
@@ -136,13 +139,13 @@ public class AskService {
             logger.info(result.toString());
             String resultText = result.getChoices().get(0).getText();
             rtService.syncTrace_GPT4(result, convId, msgId,
-                    question, resultText, user.getUsername());
+                    question, resultText, user.getUsername(), askReq.getQuestionType());
             return resultText;
         } catch (Exception e) {
             logger.error("ask-gpt4 异常："+ ExceptionUtils.getStackTrace(e));
             String resultText = ERROR_RESP_MSG;
-            rtService.syncTrace(null, convId, msgId,
-                    question, resultText, user);
+            rtService.syncTrace_GPT4(null, convId, msgId,
+                    question, resultText, user.getUsername(), askReq.getQuestionType());
             return resultText;
         }
     }

@@ -4,18 +4,20 @@ import com.paic.gpt.exception.ResourceNotFoundException;
 import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.User;
 import com.paic.gpt.model.UserUsage;
-import com.paic.gpt.payload.UserIdentityAvailability;
-import com.paic.gpt.payload.UserProfile;
-import com.paic.gpt.payload.UserSummary;
+import com.paic.gpt.payload.*;
 import com.paic.gpt.repository.UserRepository;
+import com.paic.gpt.security.CustomUserDetailsService;
 import com.paic.gpt.security.UserPrincipal;
 import com.paic.gpt.service.ReqTraceService;
 import com.paic.gpt.security.CurrentUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api")
@@ -27,6 +29,9 @@ public class UserController {
     @Autowired
     private ReqTraceService reqTraceService;
 
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/user/me")
@@ -36,6 +41,16 @@ public class UserController {
                 currentUser.getId(), currentUser.getUsername(), currentUser.getName(),
                 currentUser.getMemberInfo(), currentUser.getUsage());
         return userSummary;
+    }
+
+    @PostMapping("/user/update/name")
+    @PreAuthorize("hasRole('User')")
+    public ResponseEntity<?> getCurrentUser(@CurrentUser UserPrincipal currentUser,
+                                            @Valid @RequestBody UserProfile userProfile) {
+        reqTraceService.updateName(currentUser.getUsername(), userProfile.getName());
+        customUserDetailsService.cacheEvict(currentUser.getId());
+        customUserDetailsService.cacheEvict(currentUser.getUsername());
+        return ResponseEntity.ok(new ApiResponse(true, "success"));
     }
 
     @GetMapping("/user/checkUsernameAvailability")

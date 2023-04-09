@@ -25,7 +25,7 @@ public class UserService {
     private static final String MAX_TOKENS = "MAX_TOKENS";
     private static final String PARALLEL_CALLS = "PARALLEL_CALLS";
 
-    private AtomicInteger count = new AtomicInteger();
+    private final AtomicInteger count = new AtomicInteger();
 
     public String checkUserDosage(UserPrincipal currentUser) {
         UserUsage currUU = currentUser.getUsage();
@@ -46,7 +46,7 @@ public class UserService {
         }
 
         int maxThreads = Integer.parseInt(currLimit.get(PARALLEL_CALLS).getConfigs());
-        if (get() >= 1) {
+        if (get() >= maxThreads) {
             return currLimit.get(PARALLEL_CALLS).getUtterance();
         }
         return null;

@@ -55,24 +55,31 @@ public class AskController {
         String overloaded = userService.checkUserDosage(currentUser);
         if (overloaded != null) {
             logger.info(currentUser.getUsername() + "..." + overloaded);
-            return ResponseEntity.ok(new ApiResponse(false, overloaded, askRequest.getMsgId()));
+            return ResponseEntity.ok(
+                    new ApiResponse(false, overloaded,
+                            askRequest.getConversationId(),
+                            askRequest.getMsgId()));
         }
 
         String resp;
         try {
-            userService.plus();
+            int currReq = userService.plus();
             resp = askService.ask(currentUser, askRequest);
         } catch (Exception e) {
             resp = ERROR_RESP_MSG;
         } finally {
-            userService.minus();
+            int currReq = userService.minus();
+            logger.info("当前并行请求数量：" + currReq);
         }
 
 //        URI location = ServletUriComponentsBuilder
 //                .fromCurrentRequest().path("/{pollId}")
 //                .buildAndExpand(gptUserReqTrace.getId()).toUri();
 
-        return ResponseEntity.ok(new ApiResponse(true, resp, askRequest.getMsgId()));
+        return ResponseEntity.ok(
+                new ApiResponse(true, resp,
+                        askRequest.getConversationId(),
+                        askRequest.getMsgId()));
     }
 
 

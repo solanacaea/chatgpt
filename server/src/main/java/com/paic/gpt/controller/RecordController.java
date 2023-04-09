@@ -25,7 +25,9 @@ public class RecordController {
     @GetMapping("/history")
     public List<Conversation> getUserHistory(@CurrentUser UserPrincipal currentUser) {
         String username = currentUser.getUsername();
-        return converRepo.findByUsername(username);
+        List<Conversation> list = converRepo.findByUsername(username);
+        list.forEach(a -> a.setId(0L));
+        return list;
     }
 
 }
