@@ -17,5 +17,5 @@ public class AskRequest {
     private String conversationId;
     private List<ContextRequest> context;
     private String questionType;
-    private String systemMessage;
+    private boolean stream;
 }
