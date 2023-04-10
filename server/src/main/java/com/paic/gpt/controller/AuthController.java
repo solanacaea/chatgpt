@@ -179,7 +179,7 @@ public class AuthController {
         }
 
         String encodedPre = passwordEncoder.encode(req.getPrePassword());
-        boolean valid = true;
+        boolean valid = userDao.checkUsrPwd(currentUser.getUsername(), encodedPre);
         if (valid) {
             String encodedNew = passwordEncoder.encode(req.getNewPassword());
             userDao.updatePwd(currentUser.getUsername(), encodedNew);
