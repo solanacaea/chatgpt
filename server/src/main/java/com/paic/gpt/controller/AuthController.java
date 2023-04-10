@@ -75,11 +75,11 @@ public class AuthController {
     @PostMapping("/validate")
     public ResponseEntity<?> validateToken(@CurrentUser UserPrincipal currentUser) {
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("permission denied");
+            return ResponseEntity.ok(new MsgResponse("failed", "permission denied"));
         } else if (currentUser.getUsername().equalsIgnoreCase("moss")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("permission denied");
+            return ResponseEntity.ok(new MsgResponse("failed", "permission denied"));
         }
-        return ResponseEntity.ok("success");
+        return ResponseEntity.ok(new MsgResponse("success", null));
     }
 
     @PostMapping("/signin")
