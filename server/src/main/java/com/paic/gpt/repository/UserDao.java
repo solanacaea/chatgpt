@@ -1,7 +1,10 @@
 package com.paic.gpt.repository;
 
+import com.paic.gpt.model.User;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,9 @@ public class UserDao {
     @PersistenceContext
     private EntityManager em;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     @Modifying
     public void updatePwd(String username, String pwd) {
@@ -29,11 +35,14 @@ public class UserDao {
     }
 
     public boolean checkUsrPwd(String username, String pwd) {
-        String hql = "select 1 from User where username = :username and pwd = :pwd";
+        String hql = "select u from User u where u.username = :username";
         Query q = em.createQuery(hql);
-        q.setParameter("pwd", pwd);
         q.setParameter("username", username);
         List<?> list = q.getResultList();
-        return CollectionUtils.isNotEmpty(list);
+        if (CollectionUtils.isEmpty(list)) {
+            return false;
+        }
+        User u = (User) list.get(0);
+        return passwordEncoder.matches(pwd, u.getPwd());
     }
 }
