@@ -3,14 +3,10 @@ package com.paic.gpt.service;
 import com.paic.gpt.model.LimitConfig;
 import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.UserUsage;
-import com.paic.gpt.repository.ReqTraceDao;
 import com.paic.gpt.security.UserPrincipal;
-import com.paic.gpt.util.AppConstants;
-import com.theokanning.openai.Usage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 

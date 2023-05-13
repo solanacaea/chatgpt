@@ -1,10 +1,8 @@
 package com.paic.gpt.model;
 
 import com.paic.gpt.model.audit.DateAudit;
-import lombok.Builder;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "t_user_usage")

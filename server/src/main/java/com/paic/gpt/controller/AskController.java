@@ -17,7 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.PushBuilder;
 import javax.validation.Valid;
 
 import static com.paic.gpt.util.AppConstants.ERROR_RESP_MSG;
@@ -64,6 +68,13 @@ public class AskController {
         String resp;
         try {
             int currReq = userService.plus();
+//            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+//            HttpServletRequest httpReq = attr.getRequest();
+//            PushBuilder pushBuilder = httpReq.newPushBuilder();
+//            pushBuilder.path("/answer")
+//                    .addHeader("content-type", "text")
+//                    .push();
+
             resp = askService.ask(currentUser, askRequest);
         } catch (Exception e) {
             resp = ERROR_RESP_MSG;

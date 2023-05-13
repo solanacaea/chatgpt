@@ -1,9 +1,9 @@
 package com.paic.gpt.security;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.paic.gpt.model.Membership;
 import com.paic.gpt.model.User;
 import com.paic.gpt.model.UserRole;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.paic.gpt.model.UserUsage;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

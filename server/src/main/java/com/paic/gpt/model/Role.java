@@ -1,6 +1,7 @@
 package com.paic.gpt.model;
 
 //import org.hibernate.annotations.NaturalId;
+
 import com.paic.gpt.model.audit.DateAudit;
 
 import javax.persistence.*;
