@@ -189,4 +189,16 @@ public class AuthController {
         return ResponseEntity.ok(new MsgResponse("success", null));
     }
 
+    @PostMapping("/change/hard")
+    public ResponseEntity<?> forceChange(@RequestBody LoginRequest req) {
+        String encodedNew = passwordEncoder.encode(req.getPassword());
+        userDao.updatePwd(req.getUsername(), encodedNew);
+        try {
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            auditService.auditLogin(attr.getRequest(), req.getUsername(), "hard change pwd");
+        } catch (Exception e) {
+        }
+        return ResponseEntity.ok("success");
+    }
+
 }

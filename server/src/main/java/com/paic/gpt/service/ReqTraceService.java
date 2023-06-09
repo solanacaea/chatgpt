@@ -1,5 +1,6 @@
 package com.paic.gpt.service;
 
+import com.azure.ai.openai.models.ChatCompletions;
 import com.paic.gpt.exception.BadRequestException;
 import com.paic.gpt.model.Conversation;
 import com.paic.gpt.model.GptUserReqTrace;
@@ -12,7 +13,7 @@ import com.paic.gpt.security.UserPrincipal;
 import com.paic.gpt.util.AppConstants;
 //import com.theokanning.openai.completion.CompletionResult;
 //import com.theokanning.openai.completion.chat.ChatCompletionResult;
-import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
+//import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class ReqTraceService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReqTraceService.class);
 
-    public void syncTrace(ChatCompletionResponse result, String conversionId, String msgId,
+    public void syncTrace(ChatCompletions result, String conversionId, String msgId,
                           String question, String answer, UserPrincipal user, String questionType, String model) {
         try {
             int timeCost;
@@ -59,7 +60,7 @@ public class ReqTraceService {
                 totalToken = (int) result.getUsage().getTotalTokens();
                 long createdAt = result.getCreated();
                 timeCost = (int) (System.currentTimeMillis() / 1000 - createdAt);
-                model = result.getModel();
+//                model = result.getModel();
             }
             int finalReqToken = reqToken;
             int finalRespToken = respToken;

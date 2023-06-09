@@ -1,13 +1,11 @@
 package com.paic.gpt.service;
 
+import com.alibaba.fastjson.JSONObject;
+import com.azure.ai.openai.OpenAIClient;
+import com.azure.ai.openai.models.*;
 import com.paic.gpt.model.Conversation;
 import com.paic.gpt.payload.AskRequest;
 import com.paic.gpt.security.UserPrincipal;
-import com.unfbx.chatgpt.OpenAiClient;
-import com.unfbx.chatgpt.entity.chat.ChatChoice;
-import com.unfbx.chatgpt.entity.chat.ChatCompletion;
-import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
-import com.unfbx.chatgpt.entity.chat.Message;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -26,8 +24,8 @@ public class AskService {
 
     private static final Logger logger = LoggerFactory.getLogger(AskService.class);
 
-    @Value("${openai.api-key1}")
-    private String apiKey1;
+//    @Value("${openai.api-key1}")
+//    private String apiKey1;
 
 //    @Value("${openai.api-key2}")
 //    private String apiKey2;
@@ -38,6 +36,9 @@ public class AskService {
     @Value("${openai.model.chat}")
     private String chatModel;
 
+    @Value("${openai.gpt35.deploymentId}")
+    private String deploymentOrModelId;
+
     public static final int maxLength = 1000;
     public static final long timeout = 60L;
 
@@ -45,7 +46,8 @@ public class AskService {
     private ReqTraceService rtService;
 
     @Autowired
-    private OpenAiClient client;
+    private OpenAIClient client;
+//    private OpenAiClient client;
 
 //    public String getApiKey() {
 //        int idx = new Random().nextInt(3);
@@ -57,6 +59,52 @@ public class AskService {
 //        return apiKey1;
 //    }
 
+    public String ask(UserPrincipal user, AskRequest askReq) {
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        if ("chatWithContext".equalsIgnoreCase(askReq.getQuestionType())) {
+            chatMessages = askReq.getContext().stream().map(a -> new ChatMessage(ChatRole.fromString(a.getRole()))
+                    .setContent(a.getContent()))
+                    .collect(Collectors.toList());
+        }
+        chatMessages.add(new ChatMessage(ChatRole.USER).setContent(askReq.getQuestion()));
+
+        ChatCompletionsOptions opt = new ChatCompletionsOptions(chatMessages);
+        opt.setMaxTokens(maxLength);
+        opt.setModel(chatModel);
+        opt.setN(1);
+
+        String convId = askReq.getConversationId();
+        String msgId = askReq.getMsgId();
+        try {
+            logger.info("question=" + askReq.getQuestion());
+            ChatCompletions response = client.getChatCompletions(deploymentOrModelId, opt);
+            logger.info(JSONObject.toJSONString(response));
+
+            ChatChoice result = response.getChoices().get(0);
+            String resultText = result.getMessage().getContent();
+
+            long createdAt = response.getCreated();
+            int timeCost = (int) (System.currentTimeMillis() / 1000 - createdAt);
+            logger.info("user=[" + user.getUsername() + "], time cost=[" + timeCost + "] on result of [" + askReq.getQuestion() + "]");
+            logger.info("answer=" + response.toString());
+            rtService.syncTrace(response, convId, msgId,
+                    askReq.getQuestion(), resultText, user, askReq.getQuestionType(), chatModel);
+            return resultText;
+        } catch (Exception e) {
+            logger.error("ask异常："+ ExceptionUtils.getStackTrace(e));
+            String resultText = ERROR_RESP_MSG;
+            rtService.syncTrace(null, convId, msgId,
+                    askReq.getQuestion(), resultText, user, askReq.getQuestionType(), chatModel);
+            return resultText;
+        }
+    }
+
+    /*
+import com.unfbx.chatgpt.OpenAiClient;
+import com.unfbx.chatgpt.entity.chat.ChatChoice;
+import com.unfbx.chatgpt.entity.chat.ChatCompletion;
+import com.unfbx.chatgpt.entity.chat.ChatCompletionResponse;
+import com.unfbx.chatgpt.entity.chat.Message;
     public String ask(UserPrincipal user, AskRequest askReq) {
         Message currCM = Message.builder().role(Message.Role.USER).content(askReq.getQuestion()).build();
         List<Message> cms;
@@ -100,7 +148,7 @@ public class AskService {
             return resultText;
         }
     }
-
+*/
 //    public String ask(UserPrincipal user, AskRequest askReq) {
 //        ChatMessage currCM = new ChatMessage(ChatMessageRole.USER.value(), askReq.getQuestion());
 //        List<ChatMessage> cms;

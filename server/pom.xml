@@ -96,10 +96,21 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.unfbx</groupId>
-			<artifactId>chatgpt-java</artifactId>
-			<version>1.0.12</version>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-ai-openai</artifactId>
+			<version>1.0.0-beta.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.70</version>
+		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.unfbx</groupId>-->
+<!--			<artifactId>chatgpt-java</artifactId>-->
+<!--			<version>1.0.12</version>-->
+<!--		</dependency>-->
+
 <!--		<dependency>-->
 <!--			<groupId>com.theokanning.openai-gpt3-java</groupId>-->
 <!--			<artifactId>service</artifactId>-->
